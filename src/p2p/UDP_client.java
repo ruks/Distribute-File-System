@@ -23,7 +23,7 @@ public class UDP_client {
         cmd = "00" + length + " " + cmd;
         return cmd;
     }
-    
+
     public String get_LEAVE_cmd(String ip, int port) {
         String cmd = "LEAVE " + ip + " " + port;
         int length = cmd.length() + 5;
@@ -31,15 +31,16 @@ public class UDP_client {
         return cmd;
     }
 
-    public String get_SER_cmd(String IP,int port,String filename,int hops) {
-        String cmd = "SER " +IP+" "+port+" "+filename+" "+hops;
+    public String get_SER_cmd(String IP, int port, String filename, int hops) {
+        String cmd = "SER " + IP + " " + port + " " + filename + " " + hops;
         int length = cmd.length() + 5;
         cmd = "00" + length + " " + cmd;
         return cmd;
     }
+
     public String sendData(String serverAddress, int serverPort, String message) {
         // Check the arguments
-        String msg=null;
+        String msg = null;
         DatagramSocket socket = null;
         try {
             // Convert the arguments first, to ensure that they are valid
@@ -56,19 +57,6 @@ public class UDP_client {
 
             // Send it
             socket.send(packet);
-
-            // Set a receive timeout, 2000 milliseconds
-            socket.setSoTimeout(5000);
-
-            // Prepare the packet for receive
-            packet.setData(new byte[PACKETSIZE]);
-
-            // Wait for a response from the server
-            socket.receive(packet);
-
-            // Print the response
-            System.out.println("res<<: "+new String(packet.getData()));
-            msg=new String(packet.getData());
 
         } catch (Exception e) {
             System.out.println(e);

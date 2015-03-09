@@ -8,6 +8,9 @@ package p2p;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +26,7 @@ public class Node {
     private Bootsrap_client B_Server;
     private ArrayList<TableElement> routingTable;
     private ArrayList<String> fileList;
+    private ArrayList<String> cmdList;
 
     private String host = "127.0.0.1";
     private int port = 8002;
@@ -38,6 +42,7 @@ public class Node {
 
         routingTable = new ArrayList();
         fileList = new ArrayList<>();
+        cmdList = new ArrayList<>();
         fileList.add("file");
         fileList.add("file1");
         fileList.add("File1");
@@ -113,7 +118,7 @@ public class Node {
         }
     }
 
-    public searchResult search(String file, String host, int port, int hops) {
+    public void search(String file, String host, int port, int hops) {
         int cnt = 0;
         String res = "";
         for (String f : fileList) {
@@ -122,30 +127,33 @@ public class Node {
                 res += f + " ";
             }
         }
+
         if (cnt == 0) {
-            return extend_search(file, host, port, hops);
+            extend_search(file, host, port, hops);
         } else {
-            return new searchResult(cnt, res);
+            String msg = create_SEROK_response(cnt, host, port, hops - 1, res);
+//            sendData(msg, host, port);
+            client.sendData(host, port, msg);
         }
     }
 
-    public searchResult extend_search(String file, String host, int port, int hops) {
+    public void extend_search(String file, String host, int port, int hops) {
         if (hops == 0) {
-            return new searchResult(0, "");
+            return;
         }
         String cmd = get_SER_cmd(host, port, file, hops - 1);
+//        cmdList.add(cmd);
         for (TableElement node : routingTable) {
 //            UDP_client client = new UDP_client();
-            System.out.println(node.host + " " + host + " " + node.port + " " + port);
+//            System.out.println(node.host + " " + host + " " + node.port + " " + port);
             if (!node.host.equals(host) || node.port != port) {
                 System.out.println("FWD: " + node.host + " " + node.port);
                 String msg = client.sendData(node.host, node.port, cmd);
-                if (msg != null) {
-                    return new searchResult(-1, msg);
-                }
+//                if (msg != null) {
+//                    return new searchResult(-1, msg);
+//                }
             }
         }
-        return new searchResult(0, "");
     }
 
     public TableElement[] decode(String args) {
@@ -203,18 +211,35 @@ public class Node {
         if (cmd[1].equals("JOIN")) {
             int st = this.addToTable(cmd[2], Integer.parseInt(cmd[3].trim()));
             res = this.create_JOINOK_response(st);
+//            sendData(res, cmd[2], Integer.parseInt(cmd[3].trim()));
+            client.sendData(cmd[2], Integer.parseInt(cmd[3].trim()), res);
         } else if (cmd[1].equals("LEAVE")) {
             int st = this.removeFromTable(cmd[2], Integer.parseInt(cmd[3].trim()));
             res = this.create_LEAVEOK_response(st);
+//            sendData(res, cmd[2], Integer.parseInt(cmd[3].trim()));
+            client.sendData(cmd[2], Integer.parseInt(cmd[3].trim()), res);
         } else if (cmd[1].equals("SER")) {
+
+//            System.out.println(cmdList.size());
+//            for (String cmd1 : cmdList) {
+//                System.out.println(cmd1);
+//            }
+//            System.out.println(msg);
+//            if (cmdList.contains(msg)) {
+//                System.out.println("cyclic query");
+//                return create_SEROK_response(0, "", 0, 0, "");
+//            }
             //length SER IP port file_name hops
-            searchResult r = this.search(cmd[4], cmd[2], Integer.parseInt(cmd[3].trim()), Integer.parseInt(cmd[5].trim()));
-            if (r.status == -1) {
-                res=r.result;
-            } else {
-                res = create_SEROK_response(r.status, this.host, this.port, Integer.parseInt(cmd[5].trim()) - 1, r.result);
-            }
+            this.search(cmd[4], cmd[2], Integer.parseInt(cmd[3].trim()), Integer.parseInt(cmd[5].trim()));
+//            if (r.status == -1) {
+//                res = r.result;
+//            } else {
+//                res = create_SEROK_response(r.status, this.host, this.port, Integer.parseInt(cmd[5].trim()) - 1, r.result);
+//            }
+
+            res = "";
         } else {
+            System.out.println(msg);
             res = "0010 ERROR";
         }
         return res;
