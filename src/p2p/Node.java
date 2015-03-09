@@ -7,11 +7,15 @@ package p2p;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,12 +47,36 @@ public class Node {
         routingTable = new ArrayList();
         fileList = new ArrayList<>();
         cmdList = new ArrayList<>();
-        fileList.add("file");
-        fileList.add("file1");
-        fileList.add("File1");
-        for (int i = 0; i < 10; i++) {
-            fileList.add(this.nodeName + "_" + i);
+//        fileList.add("file");
+//        fileList.add("file1");
+//        fileList.add("File1");
+//        for (int i = 0; i < 10; i++) {
+//            fileList.add(this.nodeName + "_" + i);
+//        }
+        ArrayList<String> files = loadFiles();
+        int no = (int) (3 + Math.ceil((int) (Math.random() * 2)));
+        for (int i = 0; i < no; i++) {
+            int id=(int) (Math.random()*files.size());
+            fileList.add(files.remove(id));
         }
+        for (int i = 0; i < no; i++) {
+            System.out.println("File "+i+": "+fileList.get(i));
+        }
+    }
+
+    public ArrayList<String> loadFiles() {
+        ArrayList<String> files = new ArrayList<>();
+        try {
+            BufferedReader read = new BufferedReader(new FileReader("File_Names.txt"));
+            String s;
+            while ((s = read.readLine()) != null) {
+                files.add(s);
+            }
+
+        } catch (Exception ex) {
+            System.out.println("ex = " + ex);
+        }
+        return files;
     }
 
     public void start() {
