@@ -5,8 +5,7 @@
  */
 package p2p;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 /**
  *
@@ -15,7 +14,7 @@ import java.util.regex.Pattern;
 public class P2P {
 
     public static void main1(String[] args) {
-        Connect_Server c = new Connect_Server();
+        Bootsrap_client c = new Bootsrap_client();
         Node n=new Node();
         String res;
         try {
@@ -39,8 +38,17 @@ public class P2P {
         server.start();
                 
         UDP_client client=new UDP_client();
-        client.sendData("localhost",8000,"Rukshan");
         
+        String req=client.get_JOIN_cmd("localhost",8000);        
+        client.sendData("localhost",8000,req);        
+        
+        
+//        req=client.get_LEAVE_cmd("localhost",8000);        
+//        client.sendData("localhost",8000,req);
+        
+        req=client.get_SER_cmd("localhost",8000, "name",10);
+        client.sendData("localhost",8000,req);
+
     }
     
 }

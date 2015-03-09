@@ -15,7 +15,7 @@ import java.net.Socket;
  *
  * @author rukshan
  */
-public class Connect_Server {
+public class Bootsrap_client {
     //0028 UNREG 64.12.123.190 432
     
     public String get_REG_Command(String ip, int port, String name) {

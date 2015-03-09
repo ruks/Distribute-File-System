@@ -16,9 +16,11 @@ public class UDP_Server extends Thread {
 
     private final static int PACKETSIZE = 100;
     private int port;
+    private Node node;
 
     public UDP_Server(int port) {
         this.port = port;
+        node=new Node();
     }
 
     @Override
@@ -33,7 +35,7 @@ public class UDP_Server extends Thread {
             // Construct the socket
             DatagramSocket socket = new DatagramSocket(port);
 
-            System.out.println("The server is ready...");
+            System.out.println("Node is ready...");
 
             for (;;) {
                 // Create a packet
@@ -43,16 +45,21 @@ public class UDP_Server extends Thread {
                 socket.receive(packet);
 
                 // Print the packet
-                System.out.println(packet.getAddress() + " " + packet.getPort() + ": " + new String(packet.getData()));
+                System.out.println("req:>> "+packet.getAddress() + " " + packet.getPort() + ": " + new String(packet.getData()));
 
-                byte[] resData = "OK ack".getBytes();
+                String msg=new String(packet.getData());
+                String reply=this.node.handleMsg(msg);
+                //byte[] resData = "OK ack".getBytes();
+                //byte[] resData = this.create_JOINOK_response(status).getBytes();
+                byte[] resData = reply.getBytes();
                 DatagramPacket resDataPacket = new DatagramPacket(resData, resData.length, packet.getAddress(), packet.getPort());
 
                 // Return the packet to the sender
                 socket.send(resDataPacket);
             }
         } catch (Exception e) {
-            System.out.println(e);
+//            System.out.println(e);
+            e.printStackTrace();
         }
 
     }
