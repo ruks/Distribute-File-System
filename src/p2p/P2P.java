@@ -16,15 +16,17 @@ public class P2P {
         int port;
         String name;
         if (args.length > 2) {
-            host=args[0];
-            port=Integer.parseInt(args[1]);
-            name=args[2];
+            host = args[0];
+            port = Integer.parseInt(args[1]);
+            name = args[2];
         } else {
             System.out.println("error");
             return;
         }
         Node n = new Node(host, port, name);
         n.start();
+
+
     }
 
 }

@@ -56,6 +56,7 @@ public class UDP_Server extends Thread {
 
                 // Return the packet to the sender
                 socket.send(resDataPacket);
+                System.out.println("finished");
             }
         } catch (Exception e) {
 //            System.out.println(e);

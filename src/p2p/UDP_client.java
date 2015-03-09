@@ -37,9 +37,9 @@ public class UDP_client {
         cmd = "00" + length + " " + cmd;
         return cmd;
     }
-    public void sendData(String serverAddress, int serverPort, String message) {
+    public String sendData(String serverAddress, int serverPort, String message) {
         // Check the arguments
-
+        String msg=null;
         DatagramSocket socket = null;
         try {
             // Convert the arguments first, to ensure that they are valid
@@ -58,7 +58,7 @@ public class UDP_client {
             socket.send(packet);
 
             // Set a receive timeout, 2000 milliseconds
-            socket.setSoTimeout(2000);
+            socket.setSoTimeout(5000);
 
             // Prepare the packet for receive
             packet.setData(new byte[PACKETSIZE]);
@@ -68,13 +68,16 @@ public class UDP_client {
 
             // Print the response
             System.out.println("res<<: "+new String(packet.getData()));
+            msg=new String(packet.getData());
 
         } catch (Exception e) {
             System.out.println(e);
+//            e.printStackTrace();
         } finally {
             if (socket != null) {
                 socket.close();
             }
         }
+        return msg;
     }
 }

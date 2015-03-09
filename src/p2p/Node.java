@@ -122,21 +122,30 @@ public class Node {
                 res += f + " ";
             }
         }
-//        extend_search(file, host, port, hops);
-        return new searchResult(cnt, res);
+        if (cnt == 0) {
+            return extend_search(file, host, port, hops);
+        } else {
+            return new searchResult(cnt, res);
+        }
     }
 
-    public void extend_search(String file, String host, int port, int hops) {
+    public searchResult extend_search(String file, String host, int port, int hops) {
         if (hops == 0) {
-            return;
+            return new searchResult(0, "");
         }
         String cmd = get_SER_cmd(host, port, file, hops - 1);
         for (TableElement node : routingTable) {
 //            UDP_client client = new UDP_client();
-//            if (!node.host.equals(host) && node.port != port) {
-                client.sendData(node.host, node.port, cmd);
-//            }
+            System.out.println(node.host + " " + host + " " + node.port + " " + port);
+            if (!node.host.equals(host) || node.port != port) {
+                System.out.println("FWD: " + node.host + " " + node.port);
+                String msg = client.sendData(node.host, node.port, cmd);
+                if (msg != null) {
+                    return new searchResult(-1, msg);
+                }
+            }
         }
+        return new searchResult(0, "");
     }
 
     public TableElement[] decode(String args) {
@@ -153,14 +162,31 @@ public class Node {
             } else {
                 System.out.println("No of nodes= " + status);
                 String[] data = args.split(" ");
-                nodes = new TableElement[status];
+
+                int n, n1 = 0, n2 = 1;
+                if (status > 2) {
+                    n1 = (int) (Math.random() * status);
+                    n2 = (int) (Math.random() * status);
+                    while (n1 == n2) {
+                        n2 = (int) (Math.random() * status);
+                    }
+                    status = 2;
+                    nodes = new TableElement[status];
+                } else {
+                    nodes = new TableElement[status];
+                }
+
                 for (int i = 0; i < status; i++) {
-                    String ip = data[3 + 3 * i];
-                    int port = Integer.parseInt(data[3 + 3 * i + 1]);
-                    String name = data[3 + 3 * i + 2];
+                    if (i == 0) {
+                        n = n1;
+                    } else {
+                        n = n2;
+                    }
+                    String ip = data[3 + 3 * n];
+                    int port = Integer.parseInt(data[3 + 3 * n + 1]);
+                    String name = data[3 + 3 * n + 2];
                     System.out.println("node " + i + " :" + ip + " " + port + " " + name);
                     int st = this.addToTable(ip, port);
-                    System.out.println(st);
                     nodes[i] = new TableElement(ip, port);
                 }
             }
@@ -183,9 +209,13 @@ public class Node {
         } else if (cmd[1].equals("SER")) {
             //length SER IP port file_name hops
             searchResult r = this.search(cmd[4], cmd[2], Integer.parseInt(cmd[3].trim()), Integer.parseInt(cmd[5].trim()));
-            res = create_SEROK_response(r.status, this.host, this.port, Integer.parseInt(cmd[5].trim()) - 1, r.result);
+            if (r.status == -1) {
+                res=r.result;
+            } else {
+                res = create_SEROK_response(r.status, this.host, this.port, Integer.parseInt(cmd[5].trim()) - 1, r.result);
+            }
         } else {
-            res = "9090";
+            res = "0010 ERROR";
         }
         return res;
     }
@@ -221,6 +251,10 @@ public class Node {
         int length = cmd.length() + 5;
         cmd = "00" + length + " " + cmd;
         return cmd;
+    }
+
+    public void decodeSearchresult(String msg) {
+
     }
 }
 
