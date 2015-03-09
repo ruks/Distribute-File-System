@@ -5,6 +5,9 @@
  */
 package p2p;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,15 +23,64 @@ public class Node {
     private Bootsrap_client B_Server;
     private ArrayList<TableElement> routingTable;
     private ArrayList<String> fileList;
-    private String host;
-    private int port;
 
-    public Node() {
+    private String host = "127.0.0.1";
+    private int port = 8002;
+    private String nodeName = "node1";
+
+    private String Bhost = "unhosted.projects.uom.lk";
+    private int Bport = 8082;
+
+    public Node(String host, int port, String name) {
+        this.host = host;
+        this.port = port;
+        this.nodeName = name;
+
         routingTable = new ArrayList();
+        fileList = new ArrayList<>();
+        fileList.add("file");
+        fileList.add("file1");
+        fileList.add("File1");
+        for (int i = 0; i < 10; i++) {
+            fileList.add(this.nodeName + "_" + i);
+        }
     }
 
     public void start() {
+        server = new UDP_Server(this.port, this);
+        server.start();
+        client = new UDP_client();
 
+        B_Server = new Bootsrap_client();
+
+        String res;
+        try {
+            String cmd = B_Server.get_REG_Command(this.host, this.port, this.nodeName);
+            res = B_Server.connect_and_send(this.Bhost, this.Bport, cmd);
+            System.out.println(res);
+            TableElement[] nodes = this.decode(res);
+            if (nodes != null && nodes.length > 0) {
+                for (TableElement node : nodes) {
+                    String req = client.get_JOIN_cmd(this.host, this.port);
+                    client.sendData(node.host, node.port, req);
+                }
+            }
+
+            while (true) {
+                System.out.println("Enter name to search: ");
+                BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
+                String file = read.readLine();
+                searchNet(file);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("ex = " + ex);
+        }
+    }
+
+    public void searchNet(String file) {
+        extend_search(file, this.host, this.port, 5);
     }
 
     public int addToTable(String host, int port) {
@@ -61,13 +113,35 @@ public class Node {
         }
     }
 
-    public searchResult search(String file) {
-        return new searchResult(1, "");
+    public searchResult search(String file, String host, int port, int hops) {
+        int cnt = 0;
+        String res = "";
+        for (String f : fileList) {
+            if (f.contains(file)) {
+                cnt++;
+                res += f + " ";
+            }
+        }
+//        extend_search(file, host, port, hops);
+        return new searchResult(cnt, res);
     }
 
-    public static void decode(String args) {
+    public void extend_search(String file, String host, int port, int hops) {
+        if (hops == 0) {
+            return;
+        }
+        String cmd = get_SER_cmd(host, port, file, hops - 1);
+        for (TableElement node : routingTable) {
+//            UDP_client client = new UDP_client();
+//            if (!node.host.equals(host) && node.port != port) {
+                client.sendData(node.host, node.port, cmd);
+//            }
+        }
+    }
+
+    public TableElement[] decode(String args) {
         String reg = "^(\\d){4} REGOK ([0-9]+)*";
-//        args.com
+        TableElement[] nodes = null;
         Pattern p = Pattern.compile(reg);
         Matcher m = p.matcher(args);
         if (m.find()) {
@@ -78,33 +152,22 @@ public class Node {
                 System.out.println("Already Connected.....");
             } else {
                 System.out.println("No of nodes= " + status);
-                //String reg1 = "^(\\d){4} REGOK ([0-9]+)* ((\\d)+\\.){3}(\\d)+ (\\d)+ (\\w)";
-                //String reg1 = "(((\\d)+\\.){3}(\\d)+ (\\d)+ (\\w)+( )*)+?";
-//                String reg1="((\\d+\\.)+\\d+ \\d+ (?=node)( )*)+?";
-//                
-//                Pattern p1 = Pattern.compile(reg1);
-//                Matcher m1 = p1.matcher(args);
-//                if (m1.find()) {
-//
-//                    System.out.println(m1.groupCount());
-//                    for (int i = 0; i < m1.groupCount(); i++) {
-//                        System.out.println("Found value " + i + " : " + m1.group(i));
-//                    }
-//                } else {
-//                    System.out.println("NO");
-//                }
-// (\\d)+ (\\w)+( )*
                 String[] data = args.split(" ");
+                nodes = new TableElement[status];
                 for (int i = 0; i < status; i++) {
                     String ip = data[3 + 3 * i];
                     int port = Integer.parseInt(data[3 + 3 * i + 1]);
                     String name = data[3 + 3 * i + 2];
                     System.out.println("node " + i + " :" + ip + " " + port + " " + name);
+                    int st = this.addToTable(ip, port);
+                    System.out.println(st);
+                    nodes[i] = new TableElement(ip, port);
                 }
             }
-
+            return nodes;
         } else {
             System.out.println("NO MATCH");
+            return null;
         }
     }
 
@@ -119,12 +182,19 @@ public class Node {
             res = this.create_LEAVEOK_response(st);
         } else if (cmd[1].equals("SER")) {
             //length SER IP port file_name hops
-            searchResult r = this.search(cmd[4]);
-            res = create_SEROK_response(r.status, this.host, this.port, 10, r.result);
+            searchResult r = this.search(cmd[4], cmd[2], Integer.parseInt(cmd[3].trim()), Integer.parseInt(cmd[5].trim()));
+            res = create_SEROK_response(r.status, this.host, this.port, Integer.parseInt(cmd[5].trim()) - 1, r.result);
         } else {
             res = "9090";
         }
         return res;
+    }
+
+    public String get_SER_cmd(String IP, int port, String filename, int hops) {
+        String cmd = "SER " + IP + " " + port + " " + filename + " " + hops;
+        int length = cmd.length() + 5;
+        cmd = "00" + length + " " + cmd;
+        return cmd;
     }
 
     public String create_JOINOK_response(int status) {

@@ -18,9 +18,9 @@ public class UDP_Server extends Thread {
     private int port;
     private Node node;
 
-    public UDP_Server(int port) {
+    public UDP_Server(int port,Node node) {
         this.port = port;
-        node=new Node();
+        this.node=node;
     }
 
     @Override
