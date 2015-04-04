@@ -5,45 +5,48 @@
  */
 package p2p;
 
-import java.io.BufferedInputStream;
+import p2p.com.udp.impl.UDP_client;
+import p2p.com.udp.impl.UDP_Server;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import p2p.com.interfaces.node_client;
+import p2p.com.interfaces.node_server;
+import p2p.com.rpc.impl.RPC_Server;
+import p2p.ui.window;
 
 /**
  *
  * @author rukshan
  */
-public class Node {
-
-    private UDP_Server server;
-    private UDP_client client;
+public class Node extends Thread {
+    
+    private node_server server;
+    private node_client client;
     private Bootsrap_client B_Server;
     private ArrayList<TableElement> routingTable;
     private ArrayList<String> fileList;
     private ArrayList<String> cmdList;
-
+    
     private String host = "127.0.0.1";
     private int port = 8002;
     private String nodeName = "node1";
 
-    private String Bhost = "unhosted.projects.uom.lk";
+    //private String Bhost = "unhosted.projects.uom.lk";
+    private String Bhost = "127.0.0.1";
     private int Bport = 8082;
-
-    public Node(String host, int port, String name) {
+    private window window;
+    
+    public Node(String host, int port, String name, boolean isUDP, boolean isRPC, window win) {
         this.host = host;
         this.port = port;
         this.nodeName = name;
-
+        this.window = win;
+        
         routingTable = new ArrayList();
         fileList = new ArrayList<>();
         cmdList = new ArrayList<>();
@@ -56,14 +59,29 @@ public class Node {
         ArrayList<String> files = loadFiles();
         int no = (int) (3 + Math.ceil((int) (Math.random() * 2)));
         for (int i = 0; i < no; i++) {
-            int id=(int) (Math.random()*files.size());
+            int id = (int) (Math.random() * files.size());
             fileList.add(files.remove(id));
         }
-        for (int i = 0; i < no; i++) {
-            System.out.println("File "+i+": "+fileList.get(i));
+        
+        for (int i = 0; i < fileList.size(); i++) {
+            System.out.println(fileList.get(i));
+        }
+        
+        window.addFiles(fileList);
+        
+        if (isUDP) {
+            server = new UDP_Server(this.port, this);
+            client = new UDP_client();
+        } else {
+            //server = new RPC_Server(this.port, this);
+//            client = new RCP_client();
         }
     }
-
+    
+    public void console_out(String msg) {
+        window.consoleOut(msg);
+    }
+    
     public ArrayList<String> loadFiles() {
         ArrayList<String> files = new ArrayList<>();
         try {
@@ -72,20 +90,21 @@ public class Node {
             while ((s = read.readLine()) != null) {
                 files.add(s);
             }
-
+            
         } catch (Exception ex) {
             System.out.println("ex = " + ex);
         }
         return files;
     }
-
-    public void start() {
-        server = new UDP_Server(this.port, this);
-        server.start();
-        client = new UDP_client();
-
+    
+    @Override
+    public void run() {
+        
+        Thread t = new Thread(server);
+        t.start();
+        
         B_Server = new Bootsrap_client();
-
+        
         String res;
         try {
             String cmd = B_Server.get_REG_Command(this.host, this.port, this.nodeName);
@@ -98,26 +117,26 @@ public class Node {
                     client.sendData(node.host, node.port, req);
                 }
             }
-
+            
             while (true) {
                 System.out.println("Enter name to search: ");
                 BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
                 String file = read.readLine();
                 searchNet(file);
             }
-
+            
         } catch (Exception ex) {
             ex.printStackTrace();
             System.out.println("ex = " + ex);
         }
     }
-
+    
     public void searchNet(String file) {
         extend_search(file, this.host, this.port, 5);
     }
-
+    
     public int addToTable(String host, int port) {
-
+        
         TableElement ele = new TableElement(host, port);
         if (!routingTable.contains(ele)) {
             routingTable.add(ele);
@@ -126,9 +145,9 @@ public class Node {
         } else {
             return 9999;
         }
-
+        
     }
-
+    
     public int removeFromTable(String host, int port) {
 //        showTable();
         TableElement ele = new TableElement(host, port);
@@ -139,13 +158,13 @@ public class Node {
             return 9999;
         }
     }
-
+    
     public void showTable() {
         for (TableElement r : routingTable) {
             System.out.println(r.host + " " + r.port);
         }
     }
-
+    
     public void search(String file, String host, int port, int hops) {
         int cnt = 0;
         String res = "";
@@ -155,7 +174,7 @@ public class Node {
                 res += f + " ";
             }
         }
-
+        
         if (cnt == 0) {
             extend_search(file, host, port, hops);
         } else {
@@ -164,7 +183,7 @@ public class Node {
             client.sendData(host, port, msg);
         }
     }
-
+    
     public void extend_search(String file, String host, int port, int hops) {
         if (hops == 0) {
             return;
@@ -183,22 +202,22 @@ public class Node {
             }
         }
     }
-
+    
     public TableElement[] decode(String args) {
         String reg = "^(\\d){4} REGOK ([0-9]+)*";
         TableElement[] nodes = null;
         Pattern p = Pattern.compile(reg);
         Matcher m = p.matcher(args);
         if (m.find()) {
-
+            
             int status = Integer.parseInt(m.group(2));
-
+            
             if (status == 9999) {
                 System.out.println("Already Connected.....");
             } else {
                 System.out.println("No of nodes= " + status);
                 String[] data = args.split(" ");
-
+                
                 int n, n1 = 0, n2 = 1;
                 if (status > 2) {
                     n1 = (int) (Math.random() * status);
@@ -211,7 +230,7 @@ public class Node {
                 } else {
                     nodes = new TableElement[status];
                 }
-
+                
                 for (int i = 0; i < status; i++) {
                     if (i == 0) {
                         n = n1;
@@ -232,8 +251,9 @@ public class Node {
             return null;
         }
     }
-
-    public String handleMsg(String msg) {
+    
+    public void handleMsg(DatagramPacket packet) {
+        String msg = new String(packet.getData());
         String[] cmd = msg.split(" ");
         String res;
         if (cmd[1].equals("JOIN")) {
@@ -266,34 +286,37 @@ public class Node {
 //            }
 
             res = "";
+            
+        } else if (cmd[1].equals("SEROK")) {
+            window.addRow(packet);
         } else {
-            System.out.println(msg);
+            System.out.println("else: " + msg);
             res = "0010 ERROR";
         }
-        return res;
+//        return res;
     }
-
+    
     public String get_SER_cmd(String IP, int port, String filename, int hops) {
         String cmd = "SER " + IP + " " + port + " " + filename + " " + hops;
         int length = cmd.length() + 5;
         cmd = "00" + length + " " + cmd;
         return cmd;
     }
-
+    
     public String create_JOINOK_response(int status) {
         String cmd = "JOINOK " + status;
         int length = cmd.length() + 5;
         cmd = "00" + length + " " + cmd;
         return cmd;
     }
-
+    
     public String create_LEAVEOK_response(int status) {
         String cmd = "LEAVEOK " + status;
         int length = cmd.length() + 5;
         cmd = "00" + length + " " + cmd;
         return cmd;
     }
-
+    
     public String create_SEROK_response(int no_files, String IP, int port, int hops, String filename) {
         String cmd;
         if (no_files == 0) {
@@ -305,41 +328,41 @@ public class Node {
         cmd = "00" + length + " " + cmd;
         return cmd;
     }
-
+    
     public void decodeSearchresult(String msg) {
-
+        
     }
 }
 
 class TableElement {
-
+    
     String host;
     int port;
-
+    
     public TableElement(String host, int port) {
         this.host = host;
         this.port = port;
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         TableElement e = (TableElement) obj;
         return e.host.equals(this.host) && e.port == this.port;
     }
-
+    
 }
 
 class searchResult {
-
+    
     int status;
     String result;
-
+    
     public searchResult() {
     }
-
+    
     public searchResult(int status, String result) {
         this.status = status;
         this.result = result;
     }
-
+    
 }

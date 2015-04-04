@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package p2p;
+package p2p.com.udp.impl;
 
+import p2p.com.interfaces.node_client;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -13,10 +14,11 @@ import java.net.InetAddress;
  *
  * @author rukshan
  */
-public class UDP_client {
+public class UDP_client implements node_client {
 
     private final static int PACKETSIZE = 100;
 
+    @Override
     public String get_JOIN_cmd(String ip, int port) {
         String cmd = "JOIN " + ip + " " + port;
         int length = cmd.length() + 5;
@@ -24,6 +26,7 @@ public class UDP_client {
         return cmd;
     }
 
+    @Override
     public String get_LEAVE_cmd(String ip, int port) {
         String cmd = "LEAVE " + ip + " " + port;
         int length = cmd.length() + 5;
@@ -31,6 +34,7 @@ public class UDP_client {
         return cmd;
     }
 
+    @Override
     public String get_SER_cmd(String IP, int port, String filename, int hops) {
         String cmd = "SER " + IP + " " + port + " " + filename + " " + hops;
         int length = cmd.length() + 5;
@@ -38,6 +42,7 @@ public class UDP_client {
         return cmd;
     }
 
+    @Override
     public String sendData(String serverAddress, int serverPort, String message) {
         // Check the arguments
         String msg = null;

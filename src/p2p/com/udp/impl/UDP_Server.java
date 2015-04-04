@@ -3,16 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package p2p;
+package p2p.com.udp.impl;
 
+import p2p.com.interfaces.node_server;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import p2p.Node;
 
 /**
  *
  * @author rukshan
  */
-public class UDP_Server extends Thread {
+public class UDP_Server implements node_server {
 
     private final static int PACKETSIZE = 1000;
     private int port;
@@ -25,15 +27,17 @@ public class UDP_Server extends Thread {
 
     @Override
     public void run() {
-        this.start(this.port);
+        this.startListen(this.port);
     }
 
-    private void start(int port) {
+    @Override
+    public void startListen(int port) {
 
         try {
 
             // Construct the socket
             DatagramSocket socket = new DatagramSocket(port);
+            System.out.println(port);
 
             System.out.println("Node is ready...");
 
@@ -45,10 +49,13 @@ public class UDP_Server extends Thread {
                 socket.receive(packet);
 
                 // Print the packet
-                System.out.println("recived: >> "+packet.getAddress() + " " + packet.getPort() + ": " + new String(packet.getData()));
+                String out="recived: >> "+packet.getAddress() + " " + packet.getPort() + ": " + new String(packet.getData());
+                System.out.println(out);
+                this.node.console_out(out);
 
-                String msg=new String(packet.getData());
-                this.node.handleMsg(msg);
+//                String msg=new String(packet.getData());
+                this.node.handleMsg(packet);
+                
 //                
             }
         } catch (Exception e) {

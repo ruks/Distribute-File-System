@@ -23,7 +23,7 @@ public class P2P {
             System.out.println("error");
             return;
         }
-        Node n = new Node(host, port, name);
+        Node n = new Node(host, port, name,true,false,null);
         n.start();
 
 

@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package p2p;
+package p2p.com.rpc.impl;
 
 import org.apache.xmlrpc.WebServer;
+import p2p.Node;
 
 /**
  *
