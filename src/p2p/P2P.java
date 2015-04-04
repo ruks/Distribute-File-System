@@ -5,6 +5,8 @@
  */
 package p2p;
 
+import p2p.ui.window;
+
 /**
  *
  * @author rukshan
@@ -12,20 +14,30 @@ package p2p;
 public class P2P {
 
     public static void main(String[] args) {
-        String host;
-        int port;
-        String name;
-        if (args.length > 2) {
-            host = args[0];
-            port = Integer.parseInt(args[1]);
-            name = args[2];
-        } else {
-            System.out.println("error");
-            return;
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        Node n = new Node(host, port, name,true,false,null);
-        n.start();
+        //</editor-fold>
 
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new window().setVisible(true);
+            }
+        });
 
     }
 

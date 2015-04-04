@@ -14,8 +14,10 @@ import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import p2p.com.command.Commands;
 import p2p.com.interfaces.node_client;
 import p2p.com.interfaces.node_server;
+import p2p.com.rpc.impl.RPC_Client;
 import p2p.com.rpc.impl.RPC_Server;
 import p2p.ui.window;
 
@@ -73,8 +75,8 @@ public class Node extends Thread {
             server = new UDP_Server(this.port, this);
             client = new UDP_client();
         } else {
-            //server = new RPC_Server(this.port, this);
-//            client = new RCP_client();
+            server = new RPC_Server(this.port, this);
+            client = new RPC_Client();
         }
     }
     
@@ -113,7 +115,7 @@ public class Node extends Thread {
             TableElement[] nodes = this.decode(res);
             if (nodes != null && nodes.length > 0) {
                 for (TableElement node : nodes) {
-                    String req = client.get_JOIN_cmd(this.host, this.port);
+                    String req = Commands.get_JOIN_cmd(this.host, this.port);
                     client.sendData(node.host, node.port, req);
                 }
             }
@@ -195,7 +197,7 @@ public class Node extends Thread {
 //            System.out.println(node.host + " " + host + " " + node.port + " " + port);
             if (!node.host.equals(host) || node.port != port) {
                 System.out.println("FWD: " + node.host + " " + node.port);
-                String msg = client.sendData(node.host, node.port, cmd);
+                client.sendData(node.host, node.port, cmd);
 //                if (msg != null) {
 //                    return new searchResult(-1, msg);
 //                }
@@ -252,8 +254,8 @@ public class Node extends Thread {
         }
     }
     
-    public void handleMsg(DatagramPacket packet) {
-        String msg = new String(packet.getData());
+    public void handleMsg(String msg,String host,int port) {
+        
         String[] cmd = msg.split(" ");
         String res;
         if (cmd[1].equals("JOIN")) {
@@ -288,7 +290,13 @@ public class Node extends Thread {
             res = "";
             
         } else if (cmd[1].equals("SEROK")) {
-            window.addRow(packet);
+            
+            int nof=Integer.parseInt(cmd[2]);
+            String ip=cmd[3];
+            int nport=Integer.parseInt(cmd[4]);
+            for (int i = 0; i < nof; i++) {
+                window.addRow(cmd[6+i],ip,nport);
+            }
         } else {
             System.out.println("else: " + msg);
             res = "0010 ERROR";

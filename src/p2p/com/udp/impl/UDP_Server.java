@@ -20,9 +20,9 @@ public class UDP_Server implements node_server {
     private int port;
     private Node node;
 
-    public UDP_Server(int port,Node node) {
+    public UDP_Server(int port, Node node) {
         this.port = port;
-        this.node=node;
+        this.node = node;
     }
 
     @Override
@@ -49,13 +49,13 @@ public class UDP_Server implements node_server {
                 socket.receive(packet);
 
                 // Print the packet
-                String out="recived: >> "+packet.getAddress() + " " + packet.getPort() + ": " + new String(packet.getData());
+                String out = "recived: >> " + packet.getAddress() + " " + packet.getPort() + ": " + new String(packet.getData());
                 System.out.println(out);
                 this.node.console_out(out);
 
 //                String msg=new String(packet.getData());
-                this.node.handleMsg(packet);
-                
+                this.node.handleMsg(new String(packet.getData()), packet.getAddress().toString(), packet.getPort());
+
 //                
             }
         } catch (Exception e) {

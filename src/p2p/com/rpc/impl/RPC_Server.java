@@ -7,12 +7,13 @@ package p2p.com.rpc.impl;
 
 import org.apache.xmlrpc.WebServer;
 import p2p.Node;
+import p2p.com.interfaces.node_server;
 
 /**
  *
  * @author rukshan
  */
-public class RPC_Server extends Thread {
+public class RPC_Server implements node_server {
 
     private int port;
     private Node node;
@@ -22,27 +23,30 @@ public class RPC_Server extends Thread {
         this.node = node;
     }
 
-    public Integer sum(int x, int y) {
-        return new Integer(x + y);
-    }
-
     public void PUT(String msg) {
         System.out.println(msg);
-//        return 0;
-    }
-    
-    @Override
-    public void run() {
-        this.start(this.port,this.node);
+        this.node.console_out(msg);
+        try {
+            this.node.handleMsg(msg, "address", 9090);
+        } catch (Exception e) {
+            System.out.println("e = " + e);
+        }
+        
     }
 
-    private void start(int port, Node node) {
+    @Override
+    public void run() {
+        this.startListen(this.port);
+    }
+
+    @Override
+    public void startListen(int port) {
         try {
 
             System.out.println("Attempting to start XML-RPC Server...");
 
-            WebServer server = new WebServer(8080);
-            server.addHandler("sample", new RPC_Server(port, node));
+            WebServer server = new WebServer(port);
+            server.addHandler("sample",this);
             server.start();
 
             System.out.println("Started successfully.");
@@ -51,10 +55,5 @@ public class RPC_Server extends Thread {
         } catch (Exception exception) {
             System.err.println("JavaServer: " + exception);
         }
-    }
-
-    public static void main(String[] args) {
-        RPC_Server s=new RPC_Server(8080, null);
-        s.start();
     }
 }

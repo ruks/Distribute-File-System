@@ -88,16 +88,16 @@
                       <Component id="node_ip" max="32767" attributes="0"/>
                       <Component id="node_port" max="32767" attributes="0"/>
                       <Component id="node_name" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Component id="is_RPC" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="0" pref="22" max="32767" attributes="0"/>
+                      </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          <Component id="start_btn" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="is_socket" min="-2" max="-2" attributes="0"/>
-                              <Component id="is_RPC" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="start_btn" alignment="1" min="-2" max="-2" attributes="0"/>
+                              <Component id="is_socket" alignment="1" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="0" pref="5" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -151,12 +151,12 @@
         </Component>
         <Component class="javax.swing.JRadioButton" name="is_RPC">
           <Properties>
+            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="Use RPC"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JRadioButton" name="is_socket">
           <Properties>
-            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="Use socket"/>
           </Properties>
         </Component>
@@ -201,6 +201,7 @@
       <SubComponents>
         <Component class="javax.swing.JTextArea" name="cosole_out">
           <Properties>
+            <Property name="editable" type="boolean" value="false"/>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
           </Properties>
@@ -216,6 +217,7 @@
       <SubComponents>
         <Component class="javax.swing.JTextArea" name="fileList">
           <Properties>
+            <Property name="editable" type="boolean" value="false"/>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
           </Properties>

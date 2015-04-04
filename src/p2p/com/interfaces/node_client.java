@@ -11,12 +11,7 @@ package p2p.com.interfaces;
  */
 public interface node_client {
 
-    String get_JOIN_cmd(String ip, int port);
 
-    String get_LEAVE_cmd(String ip, int port);
-
-    String get_SER_cmd(String IP, int port, String filename, int hops);
-
-    String sendData(String serverAddress, int serverPort, String message);
+    void sendData(String serverAddress, int serverPort, String message);
     
 }

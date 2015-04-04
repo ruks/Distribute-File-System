@@ -7,22 +7,15 @@ package p2p.com.rpc.impl;
 
 import java.util.Vector;
 import org.apache.xmlrpc.XmlRpcClient;
+import p2p.com.interfaces.node_client;
 
 /**
  *
  * @author rukshan
  */
-public class RPC_Client {
+public class RPC_Client implements node_client {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-
-        RPC_Client c = new RPC_Client();
-        c.sendData("127.0.0.1", 8080, "rukshan");
-    }
-
+    @Override
     public void sendData(String serverAddress, int serverPort, String message) {
         try {
 
@@ -39,5 +32,6 @@ public class RPC_Client {
         } catch (Exception exception) {
             System.err.println("JavaClient: " + exception);
         }
-    }
+    }   
+
 }

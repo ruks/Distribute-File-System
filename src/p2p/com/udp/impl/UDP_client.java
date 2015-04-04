@@ -16,36 +16,11 @@ import java.net.InetAddress;
  */
 public class UDP_client implements node_client {
 
-    private final static int PACKETSIZE = 100;
+    private final static int PACKETSIZE = 100;    
 
     @Override
-    public String get_JOIN_cmd(String ip, int port) {
-        String cmd = "JOIN " + ip + " " + port;
-        int length = cmd.length() + 5;
-        cmd = "00" + length + " " + cmd;
-        return cmd;
-    }
-
-    @Override
-    public String get_LEAVE_cmd(String ip, int port) {
-        String cmd = "LEAVE " + ip + " " + port;
-        int length = cmd.length() + 5;
-        cmd = "00" + length + " " + cmd;
-        return cmd;
-    }
-
-    @Override
-    public String get_SER_cmd(String IP, int port, String filename, int hops) {
-        String cmd = "SER " + IP + " " + port + " " + filename + " " + hops;
-        int length = cmd.length() + 5;
-        cmd = "00" + length + " " + cmd;
-        return cmd;
-    }
-
-    @Override
-    public String sendData(String serverAddress, int serverPort, String message) {
+    public void sendData(String serverAddress, int serverPort, String message) {
         // Check the arguments
-        String msg = null;
         DatagramSocket socket = null;
         try {
             // Convert the arguments first, to ensure that they are valid
@@ -71,6 +46,5 @@ public class UDP_client implements node_client {
                 socket.close();
             }
         }
-        return msg;
     }
 }

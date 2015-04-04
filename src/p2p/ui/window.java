@@ -27,9 +27,9 @@ public class window extends javax.swing.JFrame {
         initComponents();
     }
 
-    public void addRow(DatagramPacket packet) {
+    public void addRow(String msg,String host,int port) {
         defaultModel = (DefaultTableModel) resultTable.getModel();
-        defaultModel.addRow(new Object[]{packet.getAddress(), packet.getPort(), new String(packet.getData())});
+        defaultModel.addRow(new Object[]{host, port,msg});
     }
     
     public void addFiles(ArrayList<String> files) {
@@ -98,9 +98,9 @@ public class window extends javax.swing.JFrame {
             }
         });
 
+        is_RPC.setSelected(true);
         is_RPC.setText("Use RPC");
 
-        is_socket.setSelected(true);
         is_socket.setText("Use socket");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -113,14 +113,14 @@ public class window extends javax.swing.JFrame {
                     .addComponent(node_ip)
                     .addComponent(node_port)
                     .addComponent(node_name)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(is_RPC)
+                        .addGap(0, 22, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(start_btn))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(is_socket)
-                            .addComponent(is_RPC))
-                        .addGap(0, 5, Short.MAX_VALUE)))
+                            .addComponent(start_btn, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(is_socket, javax.swing.GroupLayout.Alignment.TRAILING))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -158,10 +158,12 @@ public class window extends javax.swing.JFrame {
         ));
         jScrollPane2.setViewportView(resultTable);
 
+        cosole_out.setEditable(false);
         cosole_out.setColumns(20);
         cosole_out.setRows(5);
         jScrollPane1.setViewportView(cosole_out);
 
+        fileList.setEditable(false);
         fileList.setColumns(20);
         fileList.setRows(5);
         jScrollPane3.setViewportView(fileList);
@@ -223,42 +225,7 @@ public class window extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Type name before Search!..", "Search Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_search_btnActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(window.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new window().setVisible(true);
-            }
-        });
-    }
-
+  
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea cosole_out;
     private javax.swing.JTextArea fileList;
