@@ -204,7 +204,7 @@ public class Node extends Thread {
         if (cnt == 0) {
             extend_search(file, host, port, hops);
         } else {
-            String msg = create_SEROK_response(cnt, host, port, hops - 1, res);
+            String msg = create_SEROK_response(cnt, this.host, this.port, hops - 1, res);
 //            sendData(msg, host, port);
             client.sendData(host, port, msg);
         }
