@@ -10,6 +10,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import p2p.Node;
@@ -29,6 +30,9 @@ public class window extends javax.swing.JFrame {
     public window() {
         initComponents();
         setAvaiIps();
+        ButtonGroup group = new ButtonGroup();
+        group.add(is_RPC);
+        group.add(is_socket);
     }
 
     public void addRow(String msg, String host, int port) {
@@ -307,7 +311,11 @@ public class window extends javax.swing.JFrame {
         String file = search_query.getText().trim();
         System.out.println(file);
         if (!file.equalsIgnoreCase("") && !file.equalsIgnoreCase(" ") && file != null) {
-            node.searchNet(file);
+            if (node != null) {
+                node.searchNet(file);
+            } else {
+                JOptionPane.showMessageDialog(this, "Connect before Search!..", "Search Error", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Type name before Search!..", "Search Error", JOptionPane.ERROR_MESSAGE);
         }

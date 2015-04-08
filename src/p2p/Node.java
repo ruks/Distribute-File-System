@@ -12,6 +12,8 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import p2p.com.command.Commands;
@@ -28,7 +30,9 @@ import p2p.ui.window;
 public class Node extends Thread {
 
     private node_server server;
+    private Thread serverThread;
     private node_client client;
+    private Thread clientThread;
     private Bootsrap_client B_Server;
     private ArrayList<TableElement> routingTable;
     private ArrayList<String> fileList;
@@ -105,8 +109,8 @@ public class Node extends Thread {
     @Override
     public void run() {
 
-        Thread t = new Thread(server);
-        t.start();
+        serverThread = new Thread(server);
+        serverThread.start();
 
         B_Server = new Bootsrap_client();
 
@@ -144,7 +148,17 @@ public class Node extends Thread {
     }
 
     public void searchNet(String file) {
+        searchLocal(file);
         extend_search(file, this.host, this.port, 5);
+    }
+
+    public void searchLocal(String file) {
+        for (String f : fileList) {
+            if (f.contains(file)) {                
+                //f
+                window.addRow(f, this.host, this.port);
+            }
+        }
     }
 
     public int addToTable(String host, int port) {
@@ -335,6 +349,20 @@ public class Node extends Thread {
     }
 
     public void stopNode() {
+        try {
+            B_Server = new Bootsrap_client();
+
+            String res;
+            String cmd = B_Server.get_UNREG_Command(this.host, this.port, "");
+            res = B_Server.connect_and_send(this.Bhost, this.Bport, cmd);
+            System.out.println(res);
+            console_out(res);
+
+            serverThread.stop();
+
+        } catch (Exception ex) {
+            System.out.println("ex = " + ex);
+        }
 
     }
 }
