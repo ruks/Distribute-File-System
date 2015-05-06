@@ -5,10 +5,14 @@
  */
 package p2p;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import p2p.ui.window;
@@ -19,9 +23,28 @@ import p2p.ui.window;
  */
 public class P2P {
 
-    public static void main(String[] args) {
+    
+    private static PrintWriter pw;
+    
+    public static void writeToFile(String line){
+        pw.println(line);
+    }
+    
+    public static void openFile(String filename){
+        try {
+            File f=new File(filename);
+            pw= new PrintWriter(f);
 
-        
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(P2P.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public static void closeFile(){
+        pw.close();
+    }
+    
+    public static void main(String[] args) {
 
         if (true) {
 //            return;

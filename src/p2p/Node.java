@@ -12,6 +12,8 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -46,6 +48,9 @@ public class Node extends Thread {
     private String Bhost = "127.0.0.1";
     private int Bport = 8082;
     private window window;
+    public static final int hoplimit = 8;
+    
+    private Hashtable<String,Integer> messageCounts;
 
     public Node(String host, int port, String name, boolean isUDP, boolean isRPC, String bhost, int bport, window win) {
         this.host = host;
@@ -56,6 +61,7 @@ public class Node extends Thread {
         this.Bhost = bhost;
         this.Bport = bport;
 
+        messageCounts = new Hashtable<String,Integer>();
         routingTable = new ArrayList();
         fileList = new ArrayList<>();
         cmdList = new ArrayList<>();
@@ -85,6 +91,28 @@ public class Node extends Thread {
             server = new RPC_Server(this.port, this);
             client = new RPC_Client();
         }
+    }
+    
+    
+    private void addToMessageCountHT(String filename){
+         if(!messageCounts.containsKey(filename)){
+            messageCounts.put(filename, 1);
+        }else{
+            int num=messageCounts.get(filename) + 1;
+            messageCounts.put(filename, num);
+        }
+    }
+    
+    public String getMessageCountHTString(){
+        String txt = "";
+        
+        Iterator<String> keyit = messageCounts.keySet().iterator();
+        while (keyit.hasNext()) {
+            String filename = keyit.next();
+            int count = messageCounts.get(filename);
+            txt +=filename+" : "+count +"\n";
+        }
+        return txt;
     }
 
     public void console_out(String msg) {
@@ -148,8 +176,9 @@ public class Node extends Thread {
     }
 
     public void searchNet(String file) {
+        window.searchtime=System.currentTimeMillis();
         searchLocal(file);
-        extend_search(file, this.host, this.port, 5);
+        extend_search(file, this.host, this.port, this.hoplimit);
     }
 
     public void searchLocal(String file) {
@@ -166,6 +195,7 @@ public class Node extends Thread {
         TableElement ele = new TableElement(host, port);
         if (!routingTable.contains(ele)) {
             routingTable.add(ele);
+            window.addRowToRT(host, port);
 //            showTable();
             return 0;
         } else {
@@ -197,21 +227,24 @@ public class Node extends Thread {
         for (String f : fileList) {
             if (f.contains(file)) {
                 cnt++;
-                res += f + " ";
+                res += f + ",";
             }
         }
 
         if (cnt == 0) {
             extend_search(file, host, port, hops);
         } else {
-            String msg = create_SEROK_response(cnt, host, port, hops - 1, res);
-//            sendData(msg, host, port);
+            //String msg = create_SEROK_response(cnt, this.host, this.port, hops - 1, res);
+            String msg = create_SEROK_response(cnt, this.host, this.port, this.hoplimit, res);
+//          sendData(msg, host, port);
             client.sendData(host, port, msg);
+            window.getStatclient().searchFound(file, hops);
         }
     }
 
     public void extend_search(String file, String host, int port, int hops) {
         if (hops == 0) {
+            P2P.writeToFile(file +" Hop exceed");
             return;
         }
         String cmd = get_SER_cmd(host, port, file, hops - 1);
@@ -269,6 +302,7 @@ public class Node extends Thread {
                     System.out.println("node " + i + " :" + ip + " " + port + " " + name);
                     int st = this.addToTable(ip, port);
                     nodes[i] = new TableElement(ip, port);
+                    
                 }
             }
             return nodes;
@@ -296,15 +330,26 @@ public class Node extends Thread {
 
             //length SER IP port file_name hops
             this.search(cmd[4], cmd[2], Integer.parseInt(cmd[3].trim()), Integer.parseInt(cmd[5].trim()));
-
+            addToMessageCountHT(cmd[4].trim());
+            
         } else if (cmd[1].equals("SEROK")) {
 
             int nof = Integer.parseInt(cmd[2]);
+            
+            int lenCmd =5;
+            for (int i = 0; i < 6; i++) {
+                lenCmd+= cmd[i].length();
+            }
+            String strFiles = msg.substring(lenCmd).trim();
+            System.out.println(strFiles);
+            
             String ip = cmd[3];
             int nport = Integer.parseInt(cmd[4]);
-            for (int i = 0; i < nof; i++) {
-                window.addRow(cmd[6 + i], ip, nport);
-            }
+            String [] files = strFiles.split(",");
+
+            for (String file : files) {
+                window.addRow(file, ip, nport);
+            }            
         } else {
             System.out.println("else: " + msg);
         }
@@ -359,6 +404,7 @@ public class Node extends Thread {
             console_out(res);
 
             serverThread.stop();
+            window.setStart(false);
 
         } catch (Exception ex) {
             System.out.println("ex = " + ex);
