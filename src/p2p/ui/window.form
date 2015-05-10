@@ -47,8 +47,10 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="btnUpdatNodeMsgCountTxt" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="lblTotalMsgs" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Component id="jScrollPane5" max="32767" attributes="0"/>
@@ -96,6 +98,7 @@
                           <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnUpdatNodeMsgCountTxt" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblTotalMsgs" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -540,6 +543,11 @@
     <Component class="javax.swing.JLabel" name="jLabel6">
       <Properties>
         <Property name="text" type="java.lang.String" value="Routing Table"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblTotalMsgs">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="----"/>
       </Properties>
     </Component>
   </SubComponents>

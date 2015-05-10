@@ -48,7 +48,7 @@ public class Node extends Thread {
     private String Bhost = "127.0.0.1";
     private int Bport = 8082;
     private window window;
-    public static final int hoplimit = 8;
+    public static final int hoplimit = 5;
     
     private Hashtable<String,Integer> messageCounts;
 
@@ -114,6 +114,19 @@ public class Node extends Thread {
         }
         return txt;
     }
+    
+        public int getAllMessageCountHT(){
+        String txt = "";
+        int total = 0;
+        Iterator<String> keyit = messageCounts.keySet().iterator();
+        while (keyit.hasNext()) {
+            String filename = keyit.next();
+            int count = messageCounts.get(filename);
+            total +=count;
+        }
+        return total;
+    }
+
 
     public void console_out(String msg) {
         window.consoleOut(msg);

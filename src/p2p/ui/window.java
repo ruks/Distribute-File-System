@@ -183,6 +183,7 @@ public class window extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
+        lblTotalMsgs = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -435,6 +436,8 @@ public class window extends javax.swing.JFrame {
 
         jLabel6.setText("Routing Table");
 
+        lblTotalMsgs.setText("----");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -457,8 +460,10 @@ public class window extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel4)
-                                .addGap(32, 32, 32)
+                                .addGap(18, 18, 18)
                                 .addComponent(btnUpdatNodeMsgCountTxt)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblTotalMsgs)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(jScrollPane5)))
                     .addGroup(layout.createSequentialGroup()
@@ -494,7 +499,8 @@ public class window extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
-                            .addComponent(btnUpdatNodeMsgCountTxt))
+                            .addComponent(btnUpdatNodeMsgCountTxt)
+                            .addComponent(lblTotalMsgs))
                         .addGap(5, 5, 5)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
@@ -515,6 +521,7 @@ public class window extends javax.swing.JFrame {
 
     private void btnUpdatNodeMsgCountTxtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdatNodeMsgCountTxtActionPerformed
         txtMessagesPerFile.setText(node.getMessageCountHTString());
+        lblTotalMsgs.setText(node.getAllMessageCountHT() + "");
     }//GEN-LAST:event_btnUpdatNodeMsgCountTxtActionPerformed
 
     private void search_btnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_search_btnActionPerformed
@@ -608,6 +615,7 @@ public class window extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JLabel lblTotalMsgs;
     private javax.swing.JComboBox node_ip;
     private javax.swing.JTextField node_name;
     private javax.swing.JTextField node_port;
